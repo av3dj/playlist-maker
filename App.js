@@ -7,7 +7,8 @@ import thunk from 'redux-thunk';
 
 import * as SecureStore from 'expo-secure-store';
 
-import Home from './components/Home'
+import Home from './components/Home';
+import LoginScreen from './components/LoginScreen';
 
 import types from './constants/Types';
 import secret from './constants/Secret';
@@ -84,8 +85,12 @@ export default function App() {
   }, []);
 
   return (
-    <Provider store={store}>
-      <Home/>
-    </Provider>
+    <LoginScreen/>
   );
+
+  // return (
+  //   <Provider store={store}>
+  //     <Home/>
+  //   </Provider>
+  // );
 }
