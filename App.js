@@ -22,7 +22,8 @@ const initialState = {
   albumArtURL: "",
   info: null,
   help: false,
-  token: ""
+  accessToken: "",
+  refreshToken: ""
 }
 
 let getToken = async () => {
@@ -36,22 +37,27 @@ const reducer = (state = initialState, action) => {
   let trackID = "";
   let features = null;
   switch (action.type) {
-    
-    case types.UPDATE_SONG: 
-      return {songName: action.songName, artistName: state.artistName, albumArtURL: state.albumArtURL, info: trackFeatures, help: initialState.help, token: _token}
-    
-    case types.UPDATE_ARTIST:
-      return {songName: state.songName, artistName: action.artistName, albumArtURL: state.albumArtURL, info: trackFeatures, help: initialState.help, token: _token}
-    
-    case types.ANALYZE:
-      return {songName: action.songName, artistName: action.artistName, albumArtURL: action.albumArtURL, info: action.features, help: initialState.help, token: _token}
 
-    case types.CLEAR:
-      return {songName: initialState.songName, artistName: initialState.artistName, albumArtURL: initialState.albumArtURL, help: initialState.help, info: initialState.info, token: _token}
+    case types.LOGIN:
+      loggedIn = true;
+      console.log("loggedIn: " + loggedIn)
+      return { ...initialState, accessToken: action.accessToken, refreshToken: action.refreshToken}
     
-    case types.TOGGLE_HELP:
-      console.log(types.TOGGLE_HELP + " " + state.songName)
-      return {songName: state.songName, artistName: state.artistName, albumArtURL: state.albumArtURL, info: state.features, help: !state.help, token: _token}
+    // case types.UPDATE_SONG: 
+    //   return {songName: action.songName, artistName: state.artistName, albumArtURL: state.albumArtURL, info: trackFeatures, help: initialState.help, token: _token}
+    
+    // case types.UPDATE_ARTIST:
+    //   return {songName: state.songName, artistName: action.artistName, albumArtURL: state.albumArtURL, info: trackFeatures, help: initialState.help, token: _token}
+    
+    // case types.ANALYZE:
+    //   return {songName: action.songName, artistName: action.artistName, albumArtURL: action.albumArtURL, info: action.features, help: initialState.help, token: _token}
+
+    // case types.CLEAR:
+    //   return {songName: initialState.songName, artistName: initialState.artistName, albumArtURL: initialState.albumArtURL, help: initialState.help, info: initialState.info, token: _token}
+    
+    // case types.TOGGLE_HELP:
+    //   console.log(types.TOGGLE_HELP + " " + state.songName)
+    //   return {songName: state.songName, artistName: state.artistName, albumArtURL: state.albumArtURL, info: state.features, help: !state.help, token: _token}
 
     default:
       return state;
@@ -60,37 +66,29 @@ const reducer = (state = initialState, action) => {
 
 const store = createStore(reducer, applyMiddleware(thunk));
 
-let _token = "";
+let loggedIn = false;
+
 
 export default function App() {
 
-  React.useEffect(()=>{
-      // Get auth token
-      (async function anyNameFunction() {
-        let x = await SecureStore.getItemAsync(KEY_TOKEN);
-        if (x === null) {
-          fetch(SPOTIFY_TOKEN_URL, {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `grant_type=client_credentials&client_id=${secret.clientID}&client_secret=${secret.clientSecret}`,
-          }).then((response)=>response.json()).then((json)=>{_token=json.access_token})
-          .catch((error)=>console.log(error));
-        } else {
-          _token = x;
-        }
-      })();
-  }, []);
+  const [login, setLogin] = React.useState(false);
+
+  function handleLogin() {
+    console.log("Handling Login");
+    setLogin(true);
+  }
+
+  if(login) {
+    return (
+    <View>
+      <Text style={{fontSize: 50}}>Logged In</Text>
+    </View>
+    );
+  }
 
   return (
-    <LoginScreen/>
+    <Provider store={store}>
+      <LoginScreen handler={()=>{handleLogin()}}/>
+    </Provider>
   );
-
-  // return (
-  //   <Provider store={store}>
-  //     <Home/>
-  //   </Provider>
-  // );
 }
