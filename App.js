@@ -7,8 +7,8 @@ import thunk from 'redux-thunk';
 
 import * as SecureStore from 'expo-secure-store';
 
-import Home from './components/Home';
 import LoginScreen from './components/LoginScreen';
+import MainScreen from './components/MainScreen';
 
 import types from './constants/Types';
 import secret from './constants/Secret';
@@ -17,9 +17,7 @@ const KEY_TOKEN = "token";
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 
 const initialState = {
-  songName: "",
-  artistName: "",
-  albumArtURL: "",
+  list: [],
   info: null,
   help: false,
   accessToken: "",
@@ -33,21 +31,23 @@ let getToken = async () => {
 let trackFeatures = null;
 
 const reducer = (state = initialState, action) => {
-  let url = "";
+
   let trackID = "";
   let features = null;
+  let newList = [];
+
   switch (action.type) {
 
     case types.LOGIN:
       loggedIn = true;
       console.log("loggedIn: " + loggedIn)
       return { ...initialState, accessToken: action.accessToken, refreshToken: action.refreshToken}
-    
-    // case types.UPDATE_SONG: 
-    //   return {songName: action.songName, artistName: state.artistName, albumArtURL: state.albumArtURL, info: trackFeatures, help: initialState.help, token: _token}
-    
-    // case types.UPDATE_ARTIST:
-    //   return {songName: state.songName, artistName: action.artistName, albumArtURL: state.albumArtURL, info: trackFeatures, help: initialState.help, token: _token}
+
+    case types.ADD_SONG:
+      state.list.push(action.data);
+      newList = state.list;
+      console.log(newList)
+      return { ...state, list: newList}
     
     // case types.ANALYZE:
     //   return {songName: action.songName, artistName: action.artistName, albumArtURL: action.albumArtURL, info: action.features, help: initialState.help, token: _token}
@@ -80,9 +80,9 @@ export default function App() {
 
   if(login) {
     return (
-    <View>
-      <Text style={{fontSize: 50}}>Logged In</Text>
-    </View>
+      <Provider store={store}>
+        <MainScreen />
+      </Provider>
     );
   }
 
