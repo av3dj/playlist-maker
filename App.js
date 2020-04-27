@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, TextInput } from 'react-native';
 
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
+import * as testTracks from './constants/Test';
 import thunk from 'redux-thunk';
 
 import * as SecureStore from 'expo-secure-store';
@@ -18,6 +19,9 @@ const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 
 const initialState = {
   list: [],
+  // list: testTracks.default,
+  updateToggle: false,
+  
   info: null,
   help: false,
   accessToken: "",
@@ -44,13 +48,30 @@ const reducer = (state = initialState, action) => {
       return { ...initialState, accessToken: action.accessToken, refreshToken: action.refreshToken}
 
     case types.ADD_SONG:
+
       state.list.push(action.data);
       newList = state.list;
-      console.log(newList)
-      return { ...state, list: newList}
+
+      return { ...state, list: newList, updateToggle: !state.updateToggle}
     
-    // case types.ANALYZE:
-    //   return {songName: action.songName, artistName: action.artistName, albumArtURL: action.albumArtURL, info: action.features, help: initialState.help, token: _token}
+    case types.REMOVE_SONG:
+      newList = state.list.filter(
+        (track) => {
+          return track.id !== action.id
+        }
+      );
+
+      return {...state, list: newList, updateToggle: !state.updateToggle}
+    
+    case types.EXPORT_PLAYLISTS:
+      return {...initialState, accessToken: state.accessToken, refreshToken: state.refreshToken}
+
+    case types.IMPORT_TRACKS:
+      console.log('import tracks' + ' tracks: ' + action.tracks.length)
+      return {...state, list: action.tracks}
+
+    case types.CLEAR_TRACKS:
+      return {...state, list: []}
 
     // case types.CLEAR:
     //   return {songName: initialState.songName, artistName: initialState.artistName, albumArtURL: initialState.albumArtURL, help: initialState.help, info: initialState.info, token: _token}
